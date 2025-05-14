@@ -12,8 +12,6 @@ import { Cam } from "./classes/cam";
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     const cam = new Cam(90, 16 / 9, 0.1, 5);
 
-
-
     const scene = new THREE.Scene();
 
     const geometry = new THREE.BoxGeometry(1, 1, 1);
