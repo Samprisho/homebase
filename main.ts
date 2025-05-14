@@ -7,11 +7,12 @@ import { Cam } from "./classes/cam";
   window.addEventListener("load", init);
 
   function init() {
+    const clock = new THREE.Clock(true);
     const canvas = id("c");
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     const cam = new Cam(90, 16 / 9, 0.1, 5);
 
-    cam.position.z = 2;
+
 
     const scene = new THREE.Scene();
 
@@ -36,13 +37,16 @@ import { Cam } from "./classes/cam";
       }
 
       const canvas = renderer.domElement;
+      canvas.tabIndex = 0;
+      canvas.focus();
+
       cam.aspect = canvas.clientWidth / canvas.clientHeight;
       cam.updateProjectionMatrix();
 
       cube.rotation.x = time;
       cube.rotation.y = time;
 
-      cam.update();
+      cam.update(clock.getDelta());
 
       renderer.render(scene, cam);
       requestAnimationFrame(render);

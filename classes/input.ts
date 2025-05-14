@@ -1,6 +1,10 @@
 class Input {
   held: boolean = false;
   key: string;
+
+  justPressed: boolean = false;
+  justReleased: boolean = false;
+
   constructor(key: string) {
     this.key = key;
   }
@@ -11,6 +15,20 @@ class Input {
 
   public get isHeld(): boolean {
     return this.held;
+  }
+
+  public get wasJustPressed(): boolean {
+    if (!this.justPressed) return false;
+
+    this.justPressed = false;
+    return true;
+  }
+
+  public get wasJustReleased(): boolean {
+    if (!this.justReleased) return false;
+
+    this.justReleased = false;
+    return false;
   }
 }
 /**
@@ -37,15 +55,40 @@ export class InputKey extends Input {
     const key = e.key;
     const old = this.held;
 
-    if (key == this.getKey) this.held = true;
-    if (old != this.held && this.onPressed) this.onPressed();
+    if (key != this.getKey) return;
+
+    this.held = true;
+    this.justReleased = true;
+
+    if (old != this.held) {
+      this.justPressed = true;
+
+      if (this.onPressed) this.onPressed();
+    } else if (old == this.held) {
+      this.justPressed = false;
+    }
   }
 
   #keyUp(e: KeyboardEvent) {
     const key = e.key;
     const old = this.held;
 
-    if (key == this.getKey) this.held = false;
-    if (old != this.held && this.onReleased) this.onReleased();
+    if (key != this.getKey) return;
+
+    this.held = false;
+    this.justPressed = false;
+
+    if (old != this.held) {
+      this.justReleased = true;
+
+      if (this.onReleased) this.onReleased();
+    } else if (old == this.held) {
+      this.justReleased = false;
+    }
   }
 }
+
+/**
+ * TODO Implement input susbsytem
+ */
+class InputSubsystem {}

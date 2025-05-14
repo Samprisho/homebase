@@ -2,9 +2,22 @@ html,
 body {
   margin: 0;
   height: 100%;
+  color: white;
+  user-select: none;
 }
 #c {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+#ui {
+  position: absolute;
+  z-index: 100;
+    width: 100%;
+  height: 100%;
+}
+
+#ui > * {
+  margin: 2px;
 }
