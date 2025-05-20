@@ -21,3 +21,7 @@ body {
 #ui > * {
   margin: 2px;
 }
+
+.hidden {
+  display: none;
+}

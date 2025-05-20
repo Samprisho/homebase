@@ -8,15 +8,15 @@ export class Cam extends PerspectiveCamera {
   a = new InputKey("a");
   d = new InputKey("d");
 
-  forwardDebug = Debug.createDebugText("direction");
+  directionDebug = Debug.createDebugText("direction");
   inputDebug = Debug.createDebugText("input");
-  rightDebug = Debug.createDebugText("right");
+  sizeDebug = Debug.createDebugText("size");
 
   constructor(fov, aspect, near, far) {
     super(fov, aspect, near, far);
 
     this.position.set(2, 2, 2);
-    this.lookAt(0, 0, 0);
+    /*     this.lookAt(0, 0, 0); */
   }
 
   update(delta: number) {
@@ -41,19 +41,23 @@ export class Cam extends PerspectiveCamera {
 
     this.inputDebug.textContent = `X: ${moveDir.x}, Y: ${moveDir.y}`;
 
-    let forward: Vector3 = new Vector3(0, 0, -1);
+    let forward: Vector3 = new Vector3(0, 0, -1).multiplyScalar(moveDir.y);
     forward.applyQuaternion(this.quaternion);
 
-    let right: Vector3 = new Vector3(1, 0, 0);
+    let right: Vector3 = new Vector3(1, 0, 0).multiplyScalar(moveDir.x);
     right.applyQuaternion(this.quaternion);
 
-    this.forwardDebug.textContent = `Direction ${forward.toArray()}`;
-    this.rightDebug.textContent = `Right ${right.toArray()}`;
+    let actualDirection: Vector3 = new Vector3()
+      .addVectors(forward, right)
+      .normalize();
 
-    let rightVel = right.multiplyScalar(moveDir.x * factor * delta);
-    let forwardVel = forward.multiplyScalar(moveDir.y * factor * delta);
+    this.directionDebug.textContent = `Direction ${actualDirection.toArray()}`;
 
-    this.position.add(rightVel);
-    this.position.add(forwardVel);
+    let velocity: Vector3 = new Vector3(0, 0, 0);
+    velocity.copy(actualDirection).multiplyScalar(factor * delta)
+
+    this.sizeDebug.textContent = `${velocity.length()}`;
+
+    this.position.add(velocity);
   }
 }

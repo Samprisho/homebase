@@ -17,6 +17,12 @@ class Input {
     return this.held;
   }
 
+  /*
+   Yes, the following functions are implemeneted
+   in the worst way possible. No, I will not
+   fix it...yet
+  */
+
   public get wasJustPressed(): boolean {
     if (!this.justPressed) return false;
 
