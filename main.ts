@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Cam } from "./classes/cam";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 (function () {
   "use strict";
@@ -7,6 +8,7 @@ import { Cam } from "./classes/cam";
   window.addEventListener("load", init);
 
   function init() {
+    const loader = new GLTFLoader();
     const clock = new THREE.Clock(true);
     const canvas = id("c");
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
@@ -14,10 +16,14 @@ import { Cam } from "./classes/cam";
 
     const scene = new THREE.Scene();
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    loader.load("/Ship.glb", (gltf) => {
+      scene.add(gltf.scene);
+    });
+
+    /*     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+/*     const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube); */
 
     const sun = new THREE.DirectionalLight(0xffffff, 3);
     sun.position.set(-1, 2, 4);
@@ -41,8 +47,8 @@ import { Cam } from "./classes/cam";
       cam.aspect = canvas.clientWidth / canvas.clientHeight;
       cam.updateProjectionMatrix();
 
-      cube.rotation.x = time;
-      cube.rotation.y = time;
+      /*       cube.rotation.x = time;
+      cube.rotation.y = time; */
 
       cam.update(clock.getDelta());
 

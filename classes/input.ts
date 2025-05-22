@@ -34,7 +34,7 @@ class Input {
     if (!this.justReleased) return false;
 
     this.justReleased = false;
-    return false;
+    return true;
   }
 }
 /**

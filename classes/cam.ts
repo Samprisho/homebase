@@ -1,4 +1,4 @@
-import { PerspectiveCamera, Vector2, Vector3, Clock, Euler } from "three";
+import { PerspectiveCamera, Vector2, Vector3 } from "three";
 import { InputKey } from "./input";
 import { Debug } from "./debug";
 
@@ -12,11 +12,11 @@ export class Cam extends PerspectiveCamera {
   inputDebug = Debug.createDebugText("input");
   sizeDebug = Debug.createDebugText("size");
 
-  constructor(fov, aspect, near, far) {
+  constructor(fov: number, aspect: number, near: number, far: number) {
     super(fov, aspect, near, far);
 
-    this.position.set(2, 2, 2);
-    /*     this.lookAt(0, 0, 0); */
+    this.position.set(0, 0, 0);
+    this.lookAt(0, 0, 0);
   }
 
   update(delta: number) {
@@ -41,7 +41,7 @@ export class Cam extends PerspectiveCamera {
 
     this.inputDebug.textContent = `X: ${moveDir.x}, Y: ${moveDir.y}`;
 
-    let forward: Vector3 = new Vector3(0, 0, -1).multiplyScalar(moveDir.y);
+    let forward: Vector3 = new Vector3(0, 1, 0).multiplyScalar(moveDir.y);
     forward.applyQuaternion(this.quaternion);
 
     let right: Vector3 = new Vector3(1, 0, 0).multiplyScalar(moveDir.x);
@@ -54,7 +54,7 @@ export class Cam extends PerspectiveCamera {
     this.directionDebug.textContent = `Direction ${actualDirection.toArray()}`;
 
     let velocity: Vector3 = new Vector3(0, 0, 0);
-    velocity.copy(actualDirection).multiplyScalar(factor * delta)
+    velocity.copy(actualDirection).multiplyScalar(factor * delta);
 
     this.sizeDebug.textContent = `${velocity.length()}`;
 
