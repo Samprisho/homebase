@@ -26705,7 +26705,7 @@ class x_ extends st {
       (this.numberOfBarrelRolls = 1),
       (this.barrelRollValue = 0),
       (this.scene = e),
-      __.load("./homebase/Ship.glb", async (t) => {
+      __.load("/homebase/Ship.glb", async (t) => {
         (this.ship = t.scene.children[0]),
           this.ship.position.set(0, -1, -3),
           this.ship.rotation.setFromVector3(new I(pi(0), pi(180), pi(0))),
