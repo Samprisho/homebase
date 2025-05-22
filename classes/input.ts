@@ -1,6 +1,11 @@
+import { Clock } from "three";
+
 class Input {
   held: boolean = false;
   key: string;
+  clock: Clock = new Clock(true);
+  timeDiff: number = 0.2;
+  oldTime: number = 0;
 
   justPressed: boolean = false;
   justReleased: boolean = false;
@@ -46,6 +51,7 @@ class Input {
 export class InputKey extends Input {
   onPressed: () => void;
   onReleased: () => void;
+  onDoublePressed: () => void;
 
   constructor(key: string) {
     super(key);
@@ -58,6 +64,7 @@ export class InputKey extends Input {
   }
 
   #keyDown(e: KeyboardEvent) {
+    const time = this.clock.getElapsedTime();
     const key = e.key;
     const old = this.held;
 
@@ -69,7 +76,11 @@ export class InputKey extends Input {
     if (old != this.held) {
       this.justPressed = true;
 
+      if (this.onDoublePressed && time - this.oldTime <= this.timeDiff)
+        this.onDoublePressed();
+
       if (this.onPressed) this.onPressed();
+      this.oldTime = this.clock.getElapsedTime();
     } else if (old == this.held) {
       this.justPressed = false;
     }

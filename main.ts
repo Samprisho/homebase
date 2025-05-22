@@ -1,24 +1,22 @@
 import * as THREE from "three";
 import { Cam } from "./classes/cam";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Ship } from "./classes/ship";
 
 (function () {
   "use strict";
 
   window.addEventListener("load", init);
 
-  function init() {
-    const loader = new GLTFLoader();
+  async function init() {
     const clock = new THREE.Clock(true);
     const canvas = id("c");
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     const cam = new Cam(90, 16 / 9, 0.1, 5);
 
     const scene = new THREE.Scene();
+    const ship = new Ship(scene);
 
-    loader.load("/Ship.glb", (gltf) => {
-      scene.add(gltf.scene);
-    });
+    /*   ship.position.set(0, -2, 2); */
 
     /*     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 });
@@ -29,10 +27,16 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
     sun.position.set(-1, 2, 4);
     scene.add(sun);
 
+    const ambient = new THREE.AmbientLight()
+    scene.add(ambient)
+
+    
+
     renderer.render(scene, cam);
 
     function render(time) {
       time *= 0.001; // convert time to seconds
+      const delta = clock.getDelta();
 
       if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
@@ -50,7 +54,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
       /*       cube.rotation.x = time;
       cube.rotation.y = time; */
 
-      cam.update(clock.getDelta());
+      cam.update(delta);
+      ship.update(delta);
 
       renderer.render(scene, cam);
       requestAnimationFrame(render);

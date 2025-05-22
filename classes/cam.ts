@@ -3,14 +3,14 @@ import { InputKey } from "./input";
 import { Debug } from "./debug";
 
 export class Cam extends PerspectiveCamera {
-  w = new InputKey("w");
+/*   w = new InputKey("w");
   s = new InputKey("s");
   a = new InputKey("a");
-  d = new InputKey("d");
+  d = new InputKey("d"); */
 
-  directionDebug = Debug.createDebugText("direction");
+/*   directionDebug = Debug.createDebugText("direction");
   inputDebug = Debug.createDebugText("input");
-  sizeDebug = Debug.createDebugText("size");
+  sizeDebug = Debug.createDebugText("size"); */
 
   constructor(fov: number, aspect: number, near: number, far: number) {
     super(fov, aspect, near, far);
@@ -20,7 +20,7 @@ export class Cam extends PerspectiveCamera {
   }
 
   update(delta: number) {
-    const factor = 2;
+/*     const factor = 2;
     let moveDir: Vector2 = new Vector2(0, 0);
 
     if (this.w.isHeld) {
@@ -58,6 +58,6 @@ export class Cam extends PerspectiveCamera {
 
     this.sizeDebug.textContent = `${velocity.length()}`;
 
-    this.position.add(velocity);
+    this.position.add(velocity); */
   }
 }
