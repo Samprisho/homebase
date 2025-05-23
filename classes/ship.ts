@@ -8,7 +8,7 @@ import {
   Vector3,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { InputKey } from "./input";
+import { InputKey, Orientation } from "./input";
 import { clamp, degToRad, lerp } from "three/src/math/MathUtils";
 import { Debug } from "./debug";
 
@@ -26,19 +26,27 @@ export class Ship extends Object3D<Object3DEventMap> {
   delta: number = 0;
 
   velocityDebug = Debug.createDebugText("vel");
+  orientationDebug = Debug.createDebugText("ori");
 
-  inertia: number = 0;
   velocity: Vector2 = new Vector2(0, 0);
-  accelaration: number = 0.5;
-  deaccelaration: number = 10;
-  maxSpeed: number = 0.1;
+  accelaration: number = 0.8;
+  deaccelaration: number = 5;
+  maxSpeed: number = 0.2;
 
   barrelRollOnCooldown: boolean = true;
   barrelRollValue: number = 0;
   barrelRollTime = 0;
   barrelRollDir: number = 0;
-  barrelRollTimeTotal: number = 700;
-  barrelRollVelocityBonus: number = 1.2;
+  /**
+   * Time in milliseconds.
+   * Note that *we stop applying barrel roll veolcity at half* of `barrelRollTimeTotal`.
+   * **See line 113.**
+   */
+  barrelRollTimeTotal: number = 500;
+  barrelRollVelocityBonus: number = 5;
+  /**
+   * **MUST BE A WHOLE NUMBER**
+   */
   numberOfBarrelRolls: number = 1;
 
   constructor(scene: Scene) {
@@ -61,6 +69,13 @@ export class Ship extends Object3D<Object3DEventMap> {
 
     this.d.onDoublePressed = this.barrelRollRight.bind(this);
     this.a.onDoublePressed = this.barrelRollLeft.bind(this);
+
+    let ori = new Orientation();
+    /* ori.handleOrientation = (event) => {
+      console.log("ss");
+      console.log(event);
+      this.orientationDebug.textContent = `${event}`;
+    }; */
   }
 
   update(delta: number) {
@@ -92,6 +107,7 @@ export class Ship extends Object3D<Object3DEventMap> {
       moveDir.x = 1;
     }
 
+    // Calculate Barrel roll velocity
     if (!this.barrelRollOnCooldown) {
       this.barrelRollValue = lerp(
         this.barrelRollValue,
@@ -100,34 +116,50 @@ export class Ship extends Object3D<Object3DEventMap> {
       );
       this.barrelRollTime += this.delta * 1000;
 
-      this.velocity.add(
-        new Vector3(
-          this.barrelRollDir *
-            delta *
-            this.barrelRollVelocityBonus *
-            (1 - (this.barrelRollTime / this.barrelRollTimeTotal) * 1.1),
-          0,
-          0
-        )
-      );
+      // Ensure we don't add velocity when we aren't rolling anymore
+      if (this.barrelRollTime / this.barrelRollTimeTotal < 0.5) {
+        this.velocity.add(
+          new Vector3(
+            this.barrelRollDir *
+              delta *
+              this.barrelRollVelocityBonus *
+              (1 - this.barrelRollTime / this.barrelRollTimeTotal),
+            0,
+            0
+          )
+        );
+      }
     }
 
+    // add veclotiy from basic wasd input
     this.velocity.x += moveDir.x * delta * this.accelaration;
     this.velocity.y += moveDir.y * delta * this.accelaration;
 
+    // Clamp velocity to maxSpeed
     this.velocity.x = clamp(this.velocity.x, -this.maxSpeed, this.maxSpeed);
     this.velocity.y = clamp(this.velocity.y, -this.maxSpeed, this.maxSpeed);
 
+    // For debug text
     this.velocityDebug.textContent = `${this.velocity.toArray()}`;
 
+    // Apply velocity
     this.ship.position.add(new Vector3(this.velocity.x, this.velocity.y, 0));
 
+    // Animate ship's orientation
     this.ship.rotation.setFromVector3(
       new Vector3(
         degToRad((this.velocity.y / this.maxSpeed) * 30),
         degToRad((this.velocity.x / this.maxSpeed) * -15 + 180),
-        degToRad((this.velocity.x / this.maxSpeed) * 30 + (this.barrelRollValue))
+        degToRad((this.velocity.x / this.maxSpeed) * 30 + this.barrelRollValue)
       )
+    );
+
+    const bounds = new Vector2(6, 4);
+    // Clamp ship to bounds
+    this.ship.position.set(
+      clamp(this.ship.position.x, -bounds.x, bounds.x),
+      clamp(this.ship.position.y, -bounds.y, bounds.y),
+      this.ship.position.z
     );
   }
 
@@ -174,5 +206,9 @@ export class Ship extends Object3D<Object3DEventMap> {
       this.barrelRollOnCooldown = true;
       this.barrelRollDir = 0;
     }, this.barrelRollTimeTotal);
+  }
+
+  handleOrientation(event) {
+    console.log(event);
   }
 }

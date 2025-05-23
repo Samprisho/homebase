@@ -105,6 +105,12 @@ export class InputKey extends Input {
   }
 }
 
+export class Orientation {
+  handleOrientation: (event: DeviceOrientationEvent) => void;
+
+  constructor() {}
+}
+
 /**
  * TODO Implement input susbsytem
  */

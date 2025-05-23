@@ -2,7 +2,7 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "baseUrl": ".", // Optional: base directory for module resolution
-    "types": ["three"], // Include three.js and Node.js types
+    // Include three.js and Node.js types
     "paths": {
       "three/*": ["node_modules/three/src/*"]
     },

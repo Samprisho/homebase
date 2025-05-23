@@ -11,10 +11,12 @@ import { Ship } from "./classes/ship";
     const clock = new THREE.Clock(true);
     const canvas = id("c");
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
-    const cam = new Cam(90, 16 / 9, 0.1, 5);
+    const cam = new Cam(90, 16 / 9, 0.1, 20);
 
     const scene = new THREE.Scene();
     const ship = new Ship(scene);
+
+    scene.background = new THREE.Color(0x00aaff)
 
     /*   ship.position.set(0, -2, 2); */
 
@@ -27,10 +29,19 @@ import { Ship } from "./classes/ship";
     sun.position.set(-1, 2, 4);
     scene.add(sun);
 
-    const ambient = new THREE.AmbientLight()
-    scene.add(ambient)
+    const ambient = new THREE.AmbientLight();
+    scene.add(ambient);
 
-    
+    cam.ship = ship;
+
+    for (let index = 0; index < 3; index++) {
+      const geo = new THREE.BoxGeometry();
+      const mat = new THREE.MeshPhongMaterial();
+      const cube = new THREE.Mesh(geo, mat);
+
+      cube.position.set(-5 + index*2, 1, -10);
+      scene.add(cube);
+    }
 
     renderer.render(scene, cam);
 
