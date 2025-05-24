@@ -18,8 +18,6 @@ export class Cam extends PerspectiveCamera {
 
     let pos = this.ship.ship.position.clone();
 
-    this.lookAt(pos.divide(new Vector3(
-      15, 10, 1
-    )));
+    this.lookAt(pos.divide(new Vector3(20, 15, 1)));
   }
 }

@@ -11,6 +11,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { InputKey, Orientation } from "./input";
 import { clamp, degToRad, lerp } from "three/src/math/MathUtils";
 import { Debug } from "./debug";
+import { Bullet, PlayerBullet } from "./bullets";
 
 const loader = new GLTFLoader();
 
@@ -22,6 +23,8 @@ export class Ship extends Object3D<Object3DEventMap> {
   s = new InputKey("s");
   a = new InputKey("a");
   d = new InputKey("d");
+  sp = new InputKey(" ");
+  j = new InputKey("j");
 
   delta: number = 0;
 
@@ -69,6 +72,8 @@ export class Ship extends Object3D<Object3DEventMap> {
 
     this.d.onDoublePressed = this.barrelRollRight.bind(this);
     this.a.onDoublePressed = this.barrelRollLeft.bind(this);
+    this.sp.onPressed = this.shoot.bind(this);
+    this.j.onPressed = this.shoot.bind(this);
 
     let ori = new Orientation();
     /* ori.handleOrientation = (event) => {
@@ -210,5 +215,12 @@ export class Ship extends Object3D<Object3DEventMap> {
 
   handleOrientation(event) {
     console.log(event);
+  }
+
+  shoot(event) {
+    let target = this.ship.position.clone();
+    target.z -= 50;
+
+    const bullet = new PlayerBullet(this.ship.position, target, 20, 1);
   }
 }

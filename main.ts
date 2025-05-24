@@ -2,6 +2,9 @@ import * as THREE from "three";
 import { Cam } from "./classes/cam";
 import { Ship } from "./classes/ship";
 
+export let gameScene: THREE.Scene = null;
+export let bullets: THREE.Group = new THREE.Group();
+
 (function () {
   "use strict";
 
@@ -16,7 +19,10 @@ import { Ship } from "./classes/ship";
     const scene = new THREE.Scene();
     const ship = new Ship(scene);
 
-    scene.background = new THREE.Color(0x00aaff)
+    bullets = new THREE.Group();
+    gameScene = scene;
+
+    scene.background = new THREE.Color(0x00aaff);
 
     /*   ship.position.set(0, -2, 2); */
 
@@ -34,12 +40,14 @@ import { Ship } from "./classes/ship";
 
     cam.ship = ship;
 
+    scene.add(bullets);
+
     for (let index = 0; index < 3; index++) {
       const geo = new THREE.BoxGeometry();
       const mat = new THREE.MeshPhongMaterial();
       const cube = new THREE.Mesh(geo, mat);
 
-      cube.position.set(-5 + index*2, 1, -10);
+      cube.position.set(-5 + index * 2, 1, -10);
       scene.add(cube);
     }
 
@@ -64,6 +72,11 @@ import { Ship } from "./classes/ship";
 
       /*       cube.rotation.x = time;
       cube.rotation.y = time; */
+
+      bullets.children.forEach((bullet) => {
+        // @ts-ignore
+        bullet.update(delta);
+      });
 
       cam.update(delta);
       ship.update(delta);

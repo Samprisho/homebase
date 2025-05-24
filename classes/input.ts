@@ -80,6 +80,7 @@ export class InputKey extends Input {
         this.onDoublePressed();
 
       if (this.onPressed) this.onPressed();
+
       this.oldTime = this.clock.getElapsedTime();
     } else if (old == this.held) {
       this.justPressed = false;
