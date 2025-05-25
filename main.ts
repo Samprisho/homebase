@@ -14,10 +14,11 @@ export let bullets: THREE.Group = new THREE.Group();
     const clock = new THREE.Clock(true);
     const canvas = id("c");
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
-    const cam = new Cam(90, 16 / 9, 0.1, 20);
+    const cam = new Cam(85, 16 / 9, 0.1, 20);
 
     const scene = new THREE.Scene();
     const ship = new Ship(scene);
+    ship.camera = cam;
 
     bullets = new THREE.Group();
     gameScene = scene;
@@ -42,12 +43,12 @@ export let bullets: THREE.Group = new THREE.Group();
 
     scene.add(bullets);
 
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < 5; index++) {
       const geo = new THREE.BoxGeometry();
       const mat = new THREE.MeshPhongMaterial();
       const cube = new THREE.Mesh(geo, mat);
 
-      cube.position.set(-5 + index * 2, 1, -10);
+      cube.position.set(-6 + index * 3, 1, -10);
       scene.add(cube);
     }
 

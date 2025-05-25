@@ -106,6 +106,21 @@ export class InputKey extends Input {
   }
 }
 
+export class MouseInput {
+  onMove: (event) => void;
+  onClick: (event) => void;
+
+  constructor() {
+    console.log("im up");
+    document.addEventListener("mousemove", (event) => {
+      if (this.onMove) this.onMove(event);
+    });
+    document.addEventListener("click", (event) => {
+      if (this.onClick) this.onClick(event);
+    });
+  }
+}
+
 export class Orientation {
   handleOrientation: (event: DeviceOrientationEvent) => void;
 

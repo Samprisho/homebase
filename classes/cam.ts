@@ -1,6 +1,4 @@
 import { PerspectiveCamera, Vector2, Vector3 } from "three";
-import { InputKey } from "./input";
-import { Debug } from "./debug";
 import { Ship } from "./ship";
 
 export class Cam extends PerspectiveCamera {
@@ -18,6 +16,6 @@ export class Cam extends PerspectiveCamera {
 
     let pos = this.ship.ship.position.clone();
 
-    this.lookAt(pos.divide(new Vector3(20, 15, 1)));
+    this.lookAt(pos.divide(new Vector3(80, 50, 1)));
   }
 }

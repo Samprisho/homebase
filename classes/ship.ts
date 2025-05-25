@@ -1,32 +1,40 @@
 import {
-  LinearInterpolant,
+  Box3,
+  Mesh,
+  MeshPhongMaterial,
   Object3D,
   Object3DEventMap,
-  Quaternion,
+  Raycaster,
   Scene,
+  SphereGeometry,
   Vector2,
   Vector3,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { InputKey, Orientation } from "./input";
+import { InputKey, MouseInput, Orientation } from "./input";
 import { clamp, degToRad, lerp } from "three/src/math/MathUtils";
 import { Debug } from "./debug";
 import { Bullet, PlayerBullet } from "./bullets";
+import { Cam } from "./cam";
 
 const loader = new GLTFLoader();
 
 export class Ship extends Object3D<Object3DEventMap> {
   ship: Object3D<Object3DEventMap>;
   scene: Scene;
+  camera: Cam;
 
   w = new InputKey("w");
   s = new InputKey("s");
   a = new InputKey("a");
   d = new InputKey("d");
-  sp = new InputKey(" ");
-  j = new InputKey("j");
+  /*   sp = new InputKey(" ");
+  j = new InputKey("j"); */
+  mouse = new MouseInput();
 
   delta: number = 0;
+
+  bounds = new Vector2(5, 4);
 
   velocityDebug = Debug.createDebugText("vel");
   orientationDebug = Debug.createDebugText("ori");
@@ -52,6 +60,9 @@ export class Ship extends Object3D<Object3DEventMap> {
    */
   numberOfBarrelRolls: number = 1;
 
+  cursor: Box3 = new Box3(new Vector3(), new Vector3());
+  cursorMesh: Mesh = new Mesh(new SphereGeometry(), new MeshPhongMaterial());
+
   constructor(scene: Scene) {
     super();
 
@@ -72,8 +83,12 @@ export class Ship extends Object3D<Object3DEventMap> {
 
     this.d.onDoublePressed = this.barrelRollRight.bind(this);
     this.a.onDoublePressed = this.barrelRollLeft.bind(this);
-    this.sp.onPressed = this.shoot.bind(this);
-    this.j.onPressed = this.shoot.bind(this);
+    /*     this.sp.onPressed = this.shoot.bind(this);
+    this.j.onPressed = this.shoot.bind(this); */
+    this.mouse.onMove = this.mouseMove.bind(this);
+    this.mouse.onClick = this.shoot.bind(this);
+
+    scene.add(this.cursorMesh);
 
     let ori = new Orientation();
     /* ori.handleOrientation = (event) => {
@@ -159,11 +174,10 @@ export class Ship extends Object3D<Object3DEventMap> {
       )
     );
 
-    const bounds = new Vector2(6, 4);
     // Clamp ship to bounds
     this.ship.position.set(
-      clamp(this.ship.position.x, -bounds.x, bounds.x),
-      clamp(this.ship.position.y, -bounds.y, bounds.y),
+      clamp(this.ship.position.x, -this.bounds.x, this.bounds.x),
+      clamp(this.ship.position.y, -this.bounds.y, this.bounds.y),
       this.ship.position.z
     );
   }
@@ -219,8 +233,30 @@ export class Ship extends Object3D<Object3DEventMap> {
 
   shoot(event) {
     let target = this.ship.position.clone();
-    target.z -= 50;
+    target.z -= 50000;
+
+    target = this.cursorMesh.position;
 
     const bullet = new PlayerBullet(this.ship.position, target, 20, 1);
+  }
+
+  mouseMove(event: MouseEvent) {
+    const c = document.getElementById("c");
+    let pos = new Vector2(event.clientX, event.clientY);
+    pos.divide(new Vector2(c.clientWidth, c.clientHeight));
+
+    // Couldn't figure out how to project mouse coordinates to
+    // world coordinates, so I'm going with a hacky solution
+
+    pos.set(
+      lerp(-this.bounds.x, this.bounds.x, pos.x),
+      lerp(-this.bounds.y, this.bounds.y, 1 - pos.y)
+    );
+
+    console.log(`${pos.toArray()}`);
+
+    pos.multiplyScalar(2.4);
+
+    this.cursorMesh.position.set(pos.x, pos.y, -10);
   }
 }

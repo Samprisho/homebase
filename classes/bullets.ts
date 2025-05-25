@@ -1,13 +1,10 @@
 import { bullets, gameScene } from "../main";
 import {
-  Color,
   CylinderGeometry,
   Mesh,
   MeshPhongMaterial,
   Object3D,
   Object3DEventMap,
-  Sphere,
-  SphereGeometry,
   Vector3,
 } from "three";
 
@@ -70,6 +67,5 @@ export class PlayerBullet extends Bullet {
     mesh.rotateX(Math.PI / 2);
 
     this.add(mesh);
-    console.log("Player!");
   }
 }
