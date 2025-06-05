@@ -17,6 +17,8 @@ export class Enemy extends Object3D<Object3DEventMap> {
   health: number = 1;
   damage: number = 1;
 
+  dispose = () => {};
+
   constructor() {
     super();
   }
@@ -39,7 +41,6 @@ export class BoxEnemy extends Enemy {
     this.moveSpeed = 1;
 
     const geo = new BoxGeometry();
-    geo.computeBoundingBox();
     const mat = new MeshPhongMaterial();
 
     this.mesh = new Mesh(geo, mat);
@@ -53,6 +54,12 @@ export class BoxEnemy extends Enemy {
 
     this.add(this.boxHelp);
     this.add(this.mesh);
+
+    this.dispose = () => {
+      geo.dispose();
+      mat.dispose();
+      this.removeFromParent();
+    };
 
     if (position) this.position.set(...position.toArray());
   }

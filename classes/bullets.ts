@@ -1,10 +1,14 @@
 import { bullets, gameScene } from "../main";
 import {
+  Box2,
+  Box3,
+  Box3Helper,
   CylinderGeometry,
   Mesh,
   MeshPhongMaterial,
   Object3D,
   Object3DEventMap,
+  Sphere,
   Vector3,
 } from "three";
 
@@ -12,10 +16,12 @@ export class Bullet extends Object3D<Object3DEventMap> {
   /**
    * In seconds
    */
-  timeToLive: number = 3;
+  timeToLive: number = 1;
   speed: number = 1;
   damage: number = 1;
   isBullet: boolean = true;
+  box: Box3;
+  mesh: Mesh;
 
   dispose: () => void;
 
@@ -52,6 +58,12 @@ export class Bullet extends Object3D<Object3DEventMap> {
     forward.multiplyScalar(delta * this.speed);
 
     this.position.add(forward);
+
+    if (this.box && this.mesh) {
+      this.box
+        .copy(this.mesh.geometry.boundingBox)
+        .applyMatrix4(this.mesh.matrix);
+    }
   }
 }
 
@@ -67,17 +79,25 @@ export class PlayerBullet extends Bullet {
     super(position, shootAt, speed, damage);
     let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
     let mat = new MeshPhongMaterial({ color: 0x00000 });
-    let mesh = new Mesh(geo, mat);
+    this.mesh = new Mesh(geo, mat);
 
-    mesh.rotateX(Math.PI / 2);
+    this.mesh.geometry.computeBoundingBox();
+
+    this.mesh.rotateX(Math.PI / 2);
     this.timeToLive = 2;
 
-    this.add(mesh);
+    this.add(this.mesh);
+
+    this.box = new Box3();
+    this.box.copy;
+
+    const help = new Box3Helper(this.box);
+    this.add(help);
 
     this.dispose = () => {
       geo.dispose();
       mat.dispose();
-      mesh.removeFromParent();
+      this.removeFromParent();
     };
   }
 }
