@@ -1,10 +1,10 @@
 import {
+  Box2,
   Box3,
   Mesh,
   MeshPhongMaterial,
   Object3D,
   Object3DEventMap,
-  Raycaster,
   Scene,
   SphereGeometry,
   Vector2,
@@ -12,9 +12,9 @@ import {
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { InputKey, MouseInput, Orientation } from "./input";
-import { clamp, degToRad, lerp } from "three/src/math/MathUtils";
+import { clamp, degToRad, lerp, randFloat } from "three/src/math/MathUtils";
 import { Debug } from "./debug";
-import { Bullet, PlayerBullet } from "./bullets";
+import { PlayerBullet } from "./bullets";
 import { Cam } from "./cam";
 
 const loader = new GLTFLoader();
@@ -23,6 +23,8 @@ export class Ship extends Object3D<Object3DEventMap> {
   ship: Object3D<Object3DEventMap>;
   scene: Scene;
   camera: Cam;
+  time: number = 0;
+  box: Box3 = new Box3();
 
   w = new InputKey("w");
   s = new InputKey("s");
@@ -79,6 +81,10 @@ export class Ship extends Object3D<Object3DEventMap> {
       );
 
       scene.add(this.ship);
+
+      this.box = new Box3();
+      // @ts-ignore
+      this.ship.geometry.computeBoundingBox();
     });
 
     this.d.onDoublePressed = this.barrelRollRight.bind(this);
@@ -89,6 +95,7 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.mouse.onClick = this.shoot.bind(this);
 
     scene.add(this.cursorMesh);
+    this.cursorMesh.geometry.scale(0.2, 0.2, 0.2);
 
     let ori = new Orientation();
     /* ori.handleOrientation = (event) => {
@@ -102,6 +109,7 @@ export class Ship extends Object3D<Object3DEventMap> {
     if (!this.ship) return;
 
     this.delta = delta;
+    this.time += delta;
 
     this.velocity = this.v2Lerp(
       this.velocity,
@@ -137,7 +145,7 @@ export class Ship extends Object3D<Object3DEventMap> {
       this.barrelRollTime += this.delta * 1000;
 
       // Ensure we don't add velocity when we aren't rolling anymore
-      if (this.barrelRollTime / this.barrelRollTimeTotal < 0.5) {
+      if (this.barrelRollTime / this.barrelRollTimeTotal < 0.5)
         this.velocity.add(
           new Vector3(
             this.barrelRollDir *
@@ -148,7 +156,6 @@ export class Ship extends Object3D<Object3DEventMap> {
             0
           )
         );
-      }
     }
 
     // add veclotiy from basic wasd input
@@ -165,12 +172,24 @@ export class Ship extends Object3D<Object3DEventMap> {
     // Apply velocity
     this.ship.position.add(new Vector3(this.velocity.x, this.velocity.y, 0));
 
+    //random jitter
+    const jitter = new Vector3(
+      Math.sin(this.time * 900),
+      Math.sin(this.time * 900),
+      Math.sin(this.time * 900)
+    );
+    jitter.multiplyScalar(0.12);
+
     // Animate ship's orientation
     this.ship.rotation.setFromVector3(
       new Vector3(
-        degToRad((this.velocity.y / this.maxSpeed) * 30),
-        degToRad((this.velocity.x / this.maxSpeed) * -15 + 180),
-        degToRad((this.velocity.x / this.maxSpeed) * 30 + this.barrelRollValue)
+        degToRad((this.velocity.y / this.maxSpeed) * 30 + jitter.x),
+        degToRad((this.velocity.x / this.maxSpeed) * -15 + 180 + jitter.y),
+        degToRad(
+          (this.velocity.x / this.maxSpeed) * 30 +
+            this.barrelRollValue +
+            jitter.z
+        )
       )
     );
 
@@ -180,6 +199,12 @@ export class Ship extends Object3D<Object3DEventMap> {
       clamp(this.ship.position.y, -this.bounds.y, this.bounds.y),
       this.ship.position.z
     );
+
+    // @ts-ignore
+    this.box
+      //@ts-ignore
+      .copy(this.ship.geometry.boundingBox)
+      .applyMatrix4(this.ship.matrixWorld);
   }
 
   v3Lerp(x: Vector3, y: Vector3, t: number): Vector3 {
@@ -237,7 +262,7 @@ export class Ship extends Object3D<Object3DEventMap> {
 
     target = this.cursorMesh.position;
 
-    const bullet = new PlayerBullet(this.ship.position, target, 20, 1);
+    new PlayerBullet(this.ship.position, target, 40, 1);
   }
 
   mouseMove(event: MouseEvent) {
@@ -245,17 +270,13 @@ export class Ship extends Object3D<Object3DEventMap> {
     let pos = new Vector2(event.clientX, event.clientY);
     pos.divide(new Vector2(c.clientWidth, c.clientHeight));
 
-    // Couldn't figure out how to project mouse coordinates to
-    // world coordinates, so I'm going with a hacky solution
-
     pos.set(
       lerp(-this.bounds.x, this.bounds.x, pos.x),
       lerp(-this.bounds.y, this.bounds.y, 1 - pos.y)
     );
 
-    console.log(`${pos.toArray()}`);
-
-    pos.multiplyScalar(2.4);
+    pos.x *= c.clientWidth / 550;
+    pos.y *= c.clientHeight / 430;
 
     this.cursorMesh.position.set(pos.x, pos.y, -10);
   }

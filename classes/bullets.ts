@@ -12,9 +12,12 @@ export class Bullet extends Object3D<Object3DEventMap> {
   /**
    * In seconds
    */
-  timeToLive: number = 8;
+  timeToLive: number = 3;
   speed: number = 1;
   damage: number = 1;
+  isBullet: boolean = true;
+
+  dispose: () => void;
 
   constructor(
     position: Vector3,
@@ -39,7 +42,7 @@ export class Bullet extends Object3D<Object3DEventMap> {
     bullets.add(this);
 
     setTimeout(() => {
-      this.removeFromParent();
+      if (this.dispose) this.dispose();
     }, this.timeToLive * 1000);
   }
 
@@ -53,6 +56,8 @@ export class Bullet extends Object3D<Object3DEventMap> {
 }
 
 export class PlayerBullet extends Bullet {
+  isPlayerBullet: boolean = true;
+
   constructor(
     position: Vector3,
     shootAt: Vector3,
@@ -65,7 +70,14 @@ export class PlayerBullet extends Bullet {
     let mesh = new Mesh(geo, mat);
 
     mesh.rotateX(Math.PI / 2);
+    this.timeToLive = 2;
 
     this.add(mesh);
+
+    this.dispose = () => {
+      geo.dispose();
+      mat.dispose();
+      mesh.removeFromParent();
+    };
   }
 }

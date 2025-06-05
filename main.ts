@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { Cam } from "./classes/cam";
 import { Ship } from "./classes/ship";
+import { BoxEnemy } from "./classes/enemies";
 
 export let gameScene: THREE.Scene = null;
 export let bullets: THREE.Group = new THREE.Group();
+export let enemies: THREE.Group = new THREE.Group();
 
 (function () {
   "use strict";
@@ -11,8 +13,15 @@ export let bullets: THREE.Group = new THREE.Group();
   window.addEventListener("load", init);
 
   async function init() {
+    const ui = id("ui");
+
     const clock = new THREE.Clock(true);
     const canvas = id("c");
+
+    ui.addEventListener("click", (event) => {
+      canvas.focus();
+    });
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     const cam = new Cam(85, 16 / 9, 0.1, 20);
 
@@ -21,6 +30,8 @@ export let bullets: THREE.Group = new THREE.Group();
     ship.camera = cam;
 
     bullets = new THREE.Group();
+    enemies = new THREE.Group();
+
     gameScene = scene;
 
     scene.background = new THREE.Color(0x00aaff);
@@ -44,15 +55,17 @@ export let bullets: THREE.Group = new THREE.Group();
     scene.add(bullets);
 
     for (let index = 0; index < 5; index++) {
-      const geo = new THREE.BoxGeometry();
-      const mat = new THREE.MeshPhongMaterial();
-      const cube = new THREE.Mesh(geo, mat);
+      const cube = new BoxEnemy(new THREE.Vector3(-3 + index * 2, 2, -10));
 
-      cube.position.set(-6 + index * 3, 1, -10);
-      scene.add(cube);
+      enemies.add(cube);
     }
 
+    scene.add(enemies);
+
     renderer.render(scene, cam);
+
+    canvas.tabIndex = 0;
+    canvas.focus();
 
     function render(time) {
       time *= 0.001; // convert time to seconds
@@ -64,12 +77,9 @@ export let bullets: THREE.Group = new THREE.Group();
         cam.updateProjectionMatrix();
       }
 
-      const canvas = renderer.domElement;
+      /*       const canvas = renderer.domElement;
       canvas.tabIndex = 0;
-      canvas.focus();
-
-      cam.aspect = canvas.clientWidth / canvas.clientHeight;
-      cam.updateProjectionMatrix();
+      canvas.focus(); */
 
       /*       cube.rotation.x = time;
       cube.rotation.y = time; */
@@ -77,6 +87,11 @@ export let bullets: THREE.Group = new THREE.Group();
       bullets.children.forEach((bullet) => {
         // @ts-ignore
         bullet.update(delta);
+      });
+
+      enemies.children.forEach((enemy) => {
+        // @ts-ignore
+        enemy.update(delta);
       });
 
       cam.update(delta);

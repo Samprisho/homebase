@@ -1,5 +1,5 @@
-import { PerspectiveCamera, Vector2, Vector3 } from "three";
-import { Ship } from "./ship";
+import { PerspectiveCamera, Vector3 } from "three"
+import { Ship } from "./ship"
 
 export class Cam extends PerspectiveCamera {
   ship: Ship = null;
