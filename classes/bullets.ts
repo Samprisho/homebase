@@ -1,16 +1,13 @@
-import { bullets, gameScene } from "../main";
 import {
-  Box2,
-  Box3,
-  Box3Helper,
   CylinderGeometry,
   Mesh,
   MeshPhongMaterial,
   Object3D,
   Object3DEventMap,
-  Sphere,
   Vector3,
 } from "three";
+import { instance } from "./instancing";
+import { BulletHitbox, collisions, Hitbox } from "./collisions";
 
 export class Bullet extends Object3D<Object3DEventMap> {
   /**
@@ -20,7 +17,6 @@ export class Bullet extends Object3D<Object3DEventMap> {
   speed: number = 1;
   damage: number = 1;
   isBullet: boolean = true;
-  box: Box3;
   mesh: Mesh;
 
   dispose: () => void;
@@ -44,8 +40,7 @@ export class Bullet extends Object3D<Object3DEventMap> {
     let mat = new MeshPhongMaterial({ color: 0x00000 });
     this.add(new Mesh(geo, mat)); */
 
-    gameScene.add(this);
-    bullets.add(this);
+    /*     gameScene.add(this); */
 
     setTimeout(() => {
       if (this.dispose) this.dispose();
@@ -58,12 +53,6 @@ export class Bullet extends Object3D<Object3DEventMap> {
     forward.multiplyScalar(delta * this.speed);
 
     this.position.add(forward);
-
-    if (this.box && this.mesh) {
-      this.box
-        .copy(this.mesh.geometry.boundingBox)
-        .applyMatrix4(this.mesh.matrix);
-    }
   }
 }
 
@@ -88,15 +77,19 @@ export class PlayerBullet extends Bullet {
 
     this.add(this.mesh);
 
-    this.box = new Box3();
-    this.box.copy;
+    let box: BulletHitbox = new BulletHitbox(this, this.mesh);
+    collisions.addHitbox(box);
+    box.collidedNotif = (other: Hitbox) => {
+      this.dispose();
+    };
 
-    const help = new Box3Helper(this.box);
-    this.add(help);
+    instance.bullets.add(this);
 
     this.dispose = () => {
       geo.dispose();
       mat.dispose();
+      box.dispose();
+      box = null;
       this.removeFromParent();
     };
   }

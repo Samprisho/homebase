@@ -1,11 +1,10 @@
 import * as THREE from "three";
-import { Cam } from "./classes/cam";
-import { Ship } from "./classes/ship";
-import { BoxEnemy } from "./classes/enemies";
-
-export let gameScene: THREE.Scene = null;
-export let bullets: THREE.Group = new THREE.Group();
-export let enemies: THREE.Group = new THREE.Group();
+import { Cam } from "classes/cam";
+import { Ship } from "classes/ship";
+import { BoxEnemy, Enemy } from "classes/enemies";
+import { Bullet } from "classes/bullets";
+import { Instancing, instance } from "classes/instancing";
+import { CollisionSystem, EntityHitbox } from "classes/collisions";
 
 (function () {
   "use strict";
@@ -26,13 +25,8 @@ export let enemies: THREE.Group = new THREE.Group();
     const cam = new Cam(85, 16 / 9, 0.1, 20);
 
     const scene = new THREE.Scene();
-    const ship = new Ship(scene);
-    ship.camera = cam;
-
-    bullets = new THREE.Group();
-    enemies = new THREE.Group();
-
-    gameScene = scene;
+    const ship = new Ship();
+    scene.add(ship);
 
     scene.background = new THREE.Color(0x00aaff);
 
@@ -52,15 +46,12 @@ export let enemies: THREE.Group = new THREE.Group();
 
     cam.ship = ship;
 
-    scene.add(bullets);
+    const inst = new Instancing(scene);
+    const collision = new CollisionSystem(scene);
 
     for (let index = 0; index < 5; index++) {
       const cube = new BoxEnemy(new THREE.Vector3(-3 + index * 2, 2, -10));
-
-      enemies.add(cube);
     }
-
-    scene.add(enemies);
 
     renderer.render(scene, cam);
 
@@ -77,6 +68,8 @@ export let enemies: THREE.Group = new THREE.Group();
         cam.updateProjectionMatrix();
       }
 
+      ship.update(delta);
+
       /*       const canvas = renderer.domElement;
       canvas.tabIndex = 0;
       canvas.focus(); */
@@ -84,18 +77,17 @@ export let enemies: THREE.Group = new THREE.Group();
       /*       cube.rotation.x = time;
       cube.rotation.y = time; */
 
-      bullets.children.forEach((bullet) => {
-        // @ts-ignore
+      instance.bullets.children.forEach((bullet: Bullet) => {
         bullet.update(delta);
       });
 
-      enemies.children.forEach((enemy) => {
-        // @ts-ignore
+      instance.enemies.children.forEach((enemy: Enemy) => {
         enemy.update(delta);
       });
 
+      collision.update();
+
       cam.update(delta);
-      ship.update(delta);
 
       renderer.render(scene, cam);
       requestAnimationFrame(render);

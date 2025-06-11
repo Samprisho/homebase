@@ -9,6 +9,8 @@ import {
   Object3DEventMap,
   Vector3,
 } from "three";
+import { instance } from "./instancing";
+import { collisions, EntityHitbox, Hitbox } from "./collisions";
 
 export class Enemy extends Object3D<Object3DEventMap> {
   attackSpeed: number = 1;
@@ -17,10 +19,11 @@ export class Enemy extends Object3D<Object3DEventMap> {
   health: number = 1;
   damage: number = 1;
 
-  dispose = () => {};
+  dispose: () => void;
 
   constructor() {
     super();
+    instance.enemies.add(this);
   }
 
   update(delta: number) {
@@ -32,7 +35,7 @@ export class Enemy extends Object3D<Object3DEventMap> {
 
 export class BoxEnemy extends Enemy {
   mesh: Mesh;
-  box: Box3;
+
   boxHelp: Box3Helper;
 
   constructor(position?: Vector3) {
@@ -46,18 +49,19 @@ export class BoxEnemy extends Enemy {
     this.mesh = new Mesh(geo, mat);
     this.mesh.geometry.computeBoundingBox();
 
-    this.box = new Box3();
-
-    this.box.copy(this.mesh.geometry.boundingBox);
-
-    this.boxHelp = new Box3Helper(this.box, 0xff0000);
-
-    this.add(this.boxHelp);
     this.add(this.mesh);
+
+    let box = new EntityHitbox(this, this.mesh);
+    collisions.addHitbox(box);
+    box.collidedNotif = (other: Hitbox) => {
+      this.dispose();
+    };
 
     this.dispose = () => {
       geo.dispose();
       mat.dispose();
+      box.dispose();
+      box = null;
       this.removeFromParent();
     };
 
@@ -66,9 +70,5 @@ export class BoxEnemy extends Enemy {
 
   override update(delta: number) {
     this.position.z += delta * this.moveSpeed;
-
-    this.box
-      .copy(this.mesh.geometry.boundingBox)
-      .applyMatrix4(this.mesh.matrix);
   }
 }

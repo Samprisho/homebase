@@ -1,30 +1,18 @@
-import {
-  Box2,
-  Box3,
-  Mesh,
-  MeshPhongMaterial,
-  Object3D,
-  Object3DEventMap,
-  Scene,
-  SphereGeometry,
-  Vector2,
-  Vector3,
-} from "three";
+import { Object3D, Object3DEventMap, Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { InputKey, MouseInput, Orientation } from "./input";
-import { clamp, degToRad, lerp, randFloat } from "three/src/math/MathUtils";
+import { InputKey, MouseInput } from "./input";
+import { clamp, degToRad, lerp } from "three/src/math/MathUtils";
 import { Debug } from "./debug";
 import { PlayerBullet } from "./bullets";
-import { Cam } from "./cam";
 
 const loader = new GLTFLoader();
 
+// TODO: General refactoring of ship code:
+/*
+ */
 export class Ship extends Object3D<Object3DEventMap> {
-  ship: Object3D<Object3DEventMap>;
-  scene: Scene;
-  camera: Cam;
+  shipMesh: Object3D<Object3DEventMap>;
   time: number = 0;
-  box: Box3 = new Box3();
 
   w = new InputKey("w");
   s = new InputKey("s");
@@ -36,7 +24,7 @@ export class Ship extends Object3D<Object3DEventMap> {
 
   delta: number = 0;
 
-  bounds = new Vector2(5, 4);
+  bounds = new Vector2(4, 2);
 
   velocityDebug = Debug.createDebugText("vel");
   orientationDebug = Debug.createDebugText("ori");
@@ -53,7 +41,6 @@ export class Ship extends Object3D<Object3DEventMap> {
   /**
    * Time in milliseconds.
    * Note that *we stop applying barrel roll veolcity at half* of `barrelRollTimeTotal`.
-   * **See line 113.**
    */
   barrelRollTimeTotal: number = 500;
   barrelRollVelocityBonus: number = 5;
@@ -62,29 +49,22 @@ export class Ship extends Object3D<Object3DEventMap> {
    */
   numberOfBarrelRolls: number = 1;
 
-  cursor: Box3 = new Box3(new Vector3(), new Vector3());
-  cursorMesh: Mesh = new Mesh(new SphereGeometry(), new MeshPhongMaterial());
+  /*   cursor: Box3 = new Box3(new Vector3(), new Vector3());
+  cursorMesh: Mesh = new Mesh(new SphereGeometry(), new MeshPhongMaterial()); */
 
-  constructor(scene: Scene) {
+  aim: Vector3 = new Vector3(0, 0, 0);
+
+  constructor() {
     super();
 
     this.barrelRollValue = 0;
+    this.position.set(0, -1, -2.5);
 
-    this.scene = scene;
-
+    // Refactor this!
     loader.load("/Ship.glb", async (gltf) => {
-      this.ship = gltf.scene.children[0];
-
-      this.ship.position.set(0, -1, -3);
-      this.ship.rotation.setFromVector3(
-        new Vector3(degToRad(0), degToRad(180), degToRad(0))
-      );
-
-      scene.add(this.ship);
-
-      this.box = new Box3();
-      // @ts-ignore
-      this.ship.geometry.computeBoundingBox();
+      this.shipMesh = gltf.scene.children[0];
+      this.shipMesh.scale.multiplyScalar(0.8);
+      this.add(this.shipMesh);
     });
 
     this.d.onDoublePressed = this.barrelRollRight.bind(this);
@@ -94,10 +74,10 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.mouse.onMove = this.mouseMove.bind(this);
     this.mouse.onClick = this.shoot.bind(this);
 
-    scene.add(this.cursorMesh);
-    this.cursorMesh.geometry.scale(0.2, 0.2, 0.2);
+    /*     this.cursorMesh.geometry.scale(0.2, 0.2, 0.2); */
 
-    let ori = new Orientation();
+    /* 
+    let ori = new Orientation(); */
     /* ori.handleOrientation = (event) => {
       console.log("ss");
       console.log(event);
@@ -106,8 +86,6 @@ export class Ship extends Object3D<Object3DEventMap> {
   }
 
   update(delta: number) {
-    if (!this.ship) return;
-
     this.delta = delta;
     this.time += delta;
 
@@ -170,7 +148,7 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.velocityDebug.textContent = `${this.velocity.toArray()}`;
 
     // Apply velocity
-    this.ship.position.add(new Vector3(this.velocity.x, this.velocity.y, 0));
+    this.position.add(new Vector3(this.velocity.x, this.velocity.y, 0));
 
     //random jitter
     const jitter = new Vector3(
@@ -181,7 +159,7 @@ export class Ship extends Object3D<Object3DEventMap> {
     jitter.multiplyScalar(0.12);
 
     // Animate ship's orientation
-    this.ship.rotation.setFromVector3(
+    this.rotation.setFromVector3(
       new Vector3(
         degToRad((this.velocity.y / this.maxSpeed) * 30 + jitter.x),
         degToRad((this.velocity.x / this.maxSpeed) * -15 + 180 + jitter.y),
@@ -194,17 +172,11 @@ export class Ship extends Object3D<Object3DEventMap> {
     );
 
     // Clamp ship to bounds
-    this.ship.position.set(
-      clamp(this.ship.position.x, -this.bounds.x, this.bounds.x),
-      clamp(this.ship.position.y, -this.bounds.y, this.bounds.y),
-      this.ship.position.z
+    this.position.set(
+      clamp(this.position.x, -this.bounds.x, this.bounds.x),
+      clamp(this.position.y, -this.bounds.y, this.bounds.y),
+      this.position.z
     );
-
-    // @ts-ignore
-    this.box
-      //@ts-ignore
-      .copy(this.ship.geometry.boundingBox)
-      .applyMatrix4(this.ship.matrixWorld);
   }
 
   v3Lerp(x: Vector3, y: Vector3, t: number): Vector3 {
@@ -225,6 +197,8 @@ export class Ship extends Object3D<Object3DEventMap> {
 
     return result;
   }
+
+  // TODO: Refactor repettitve barrel roll code to use 1 function
 
   barrelRollLeft() {
     if (this.barrelRollOnCooldown == false) return;
@@ -257,15 +231,14 @@ export class Ship extends Object3D<Object3DEventMap> {
   }
 
   shoot(event) {
-    let target = this.ship.position.clone();
-    target.z -= 50000;
-
-    target = this.cursorMesh.position;
-
-    new PlayerBullet(this.ship.position, target, 40, 1);
+    new PlayerBullet(this.position, this.aim, 40, 1);
   }
 
+  // Track mouse movement and ship's aim
   mouseMove(event: MouseEvent) {
+    // The incoming code may give you an anuerism
+    // Samprisho is not responsible for any psychological damage inflicted
+
     const c = document.getElementById("c");
     let pos = new Vector2(event.clientX, event.clientY);
     pos.divide(new Vector2(c.clientWidth, c.clientHeight));
@@ -275,9 +248,9 @@ export class Ship extends Object3D<Object3DEventMap> {
       lerp(-this.bounds.y, this.bounds.y, 1 - pos.y)
     );
 
-    pos.x *= c.clientWidth / 550;
-    pos.y *= c.clientHeight / 430;
+    pos.x *= c.clientWidth / 400;
+    pos.y *= c.clientHeight / 200;
 
-    this.cursorMesh.position.set(pos.x, pos.y, -10);
+    this.aim.set(...pos.toArray(), -10);
   }
 }
