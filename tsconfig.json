@@ -5,7 +5,8 @@
     // Include three.js and Node.js types
     "paths": {
       "three/*": ["node_modules/three/src/*"],
-      "classes/*": ["./classes/*"]
+      "classes/*": ["./classes/*"],
+      "public/*": ["./public/*"]
     },
     "types": [
       "three",

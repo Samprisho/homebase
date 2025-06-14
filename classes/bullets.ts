@@ -89,7 +89,6 @@ export class PlayerBullet extends Bullet {
       geo.dispose();
       mat.dispose();
       box.dispose();
-      box = null;
       this.removeFromParent();
     };
   }

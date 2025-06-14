@@ -61,7 +61,7 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.position.set(0, -1, -2.5);
 
     // Refactor this!
-    loader.load("/Ship.glb", async (gltf) => {
+    loader.load("Ship.glb", async (gltf) => {
       this.shipMesh = gltf.scene.children[0];
       this.shipMesh.scale.multiplyScalar(0.8);
       this.add(this.shipMesh);
