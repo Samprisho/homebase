@@ -7,6 +7,10 @@
       "three/*": ["node_modules/three/src/*"],
       "classes/*": ["./classes/*"]
     },
+    "types": [
+      "three",
+      "node"
+    ],
     "target": "ES6",
     "noResolve": false
   },
