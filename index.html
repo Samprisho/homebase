@@ -5,12 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Homebase</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="shortcut icon" href="favicon.svg" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.svg" type="image/x-icon" />
   </head>
   <body>
-    <div aria-hidden="true" tabindex="-1" id="ui"></div>
-    <canvas tabindex="0" id="c">
-    </canvas>
+    <main>
+      <h1>HOMEBASE</h1>
+      <p>
+        "Communications to HQ's been cut... <br />
+        I can't stop flying...lest <em>they</em> destroy me <br />
+        Looks like the only path is forward..."
+      </p>
+      <section>
+        <h2>Controls</h2>
+        <ul>
+          <li>Use your mouse to aim, then left click to fire</li>
+          <li>WASD to move</li>
+          <li>Double tap A or D to do a barrel roll</li>
+        </ul>
+      </section>
+      <button>BEGIN</button>
+    </main>
+    <div class="hidden" aria-hidden="true" tabindex="-1" id="ui"></div>
+    <canvas class="hidden" tabindex="0" id="c"> </canvas>
   </body>
   <script type="module" src="main.ts"></script>
 </html>

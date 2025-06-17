@@ -2,8 +2,6 @@ html,
 body {
   margin: 0;
   height: 100%;
-  color: white;
-  user-select: none;
 }
 #c {
   width: 100%;
@@ -18,6 +16,82 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  user-select: none;
+}
+
+main > h1, h2, h3, h4, h5 {
+  text-align: center;
+}
+
+main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background-color: rgb(31, 31, 31);
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+main h1 {
+  font-size: 49pt;
+
+  border: 0.2rem solid white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+main button {
+  margin-top: 2rem;
+  padding: 1rem;
+  width: 10em;
+
+  cursor: pointer;
+
+  background-color: rgba(0, 0, 0, 0);
+  color: white;
+
+  border: 0.2rem solid white;
+  border-radius: 1rem;
+
+  font-size: xx-large;
+}
+
+main button:hover {
+  animation-name: beginselected;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes beginselected {
+  0%  {
+    color: white;
+    background-color: rgba(0, 0, 0, 0);
+  }
+  100% {
+    color: black;
+    background-color: white;
+  }
+}
+
+main section ul {
+  list-style-type: square;
+}
+
+main section ul li {
+  margin-bottom: 1rem;
+}
+
+main > p {
+  text-align: center;
+}
+
+main > p > br {
+  margin-bottom: 1em;
 }
 
 #ui > * {
@@ -25,5 +99,5 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }

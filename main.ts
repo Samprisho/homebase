@@ -12,10 +12,22 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
   window.addEventListener("load", init);
 
   async function init() {
+    const begin = qs("main button");
+    begin.addEventListener("click", start);
+  }
+
+  function start() {
+
+    const main = qs("main")
+    main.classList.add("hidden")
+
     const ui = id("ui");
 
     const clock = new THREE.Clock(true);
     const canvas = id("c");
+
+    ui.classList.remove("hidden")
+    canvas.classList.remove("hidden")
 
     ui.addEventListener("click", (event) => {
       canvas.focus();
@@ -27,6 +39,7 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
     const scene = new THREE.Scene();
     const ship = new Ship();
     scene.add(ship);
+    ship.camera = cam;
 
     scene.background = new THREE.Color(0x00aaff);
 
@@ -43,8 +56,6 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
 
     const ambient = new THREE.AmbientLight();
     scene.add(ambient);
-
-    cam.ship = ship;
 
     const inst = new Instancing(scene);
     const collision = new CollisionSystem(scene);
@@ -86,7 +97,6 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
       });
 
       collision.update();
-
       cam.update(delta);
 
       renderer.render(scene, cam);

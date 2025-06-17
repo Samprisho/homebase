@@ -26,8 +26,6 @@ export class CollisionSystem {
   }
 
   update() {
-    // or alternative name
-    // Run some foreach() loop
     this.#allHitboxes.forEach((b, i, arr) => {
       if (b.owner == null) {
         this.#allHitboxes.splice(i, 1);
@@ -51,10 +49,10 @@ export class CollisionSystem {
       }
     });
 
+    // f(O^2) time, maybe there's a better way to implement this?
     this.#entityHitboxes.forEach((bE, iE, arrE) => {
       this.#bulletHitboxes.forEach((bB, iB, arrB) => {
         if (bE.intersectsBox(bB)) {
-          console.log("AAAA");
           bE.collidedWith(bB);
           bB.collidedWith(bE);
         }

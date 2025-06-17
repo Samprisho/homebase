@@ -4,6 +4,7 @@ import { InputKey, MouseInput } from "./input";
 import { clamp, degToRad, lerp } from "three/src/math/MathUtils";
 import { Debug } from "./debug";
 import { PlayerBullet } from "./bullets";
+import { Cam } from "./cam";
 
 const loader = new GLTFLoader();
 
@@ -13,6 +14,8 @@ const loader = new GLTFLoader();
 export class Ship extends Object3D<Object3DEventMap> {
   shipMesh: Object3D<Object3DEventMap>;
   time: number = 0;
+  camera: Cam;
+  targetZ: number = -7;
 
   w = new InputKey("w");
   s = new InputKey("s");
@@ -25,9 +28,6 @@ export class Ship extends Object3D<Object3DEventMap> {
   delta: number = 0;
 
   bounds = new Vector2(4, 2);
-
-  velocityDebug = Debug.createDebugText("vel");
-  orientationDebug = Debug.createDebugText("ori");
 
   velocity: Vector2 = new Vector2(0, 0);
   accelaration: number = 0.8;
@@ -144,9 +144,6 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.velocity.x = clamp(this.velocity.x, -this.maxSpeed, this.maxSpeed);
     this.velocity.y = clamp(this.velocity.y, -this.maxSpeed, this.maxSpeed);
 
-    // For debug text
-    this.velocityDebug.textContent = `${this.velocity.toArray()}`;
-
     // Apply velocity
     this.position.add(new Vector3(this.velocity.x, this.velocity.y, 0));
 
@@ -236,21 +233,23 @@ export class Ship extends Object3D<Object3DEventMap> {
 
   // Track mouse movement and ship's aim
   mouseMove(event: MouseEvent) {
-    // The incoming code may give you an anuerism
-    // Samprisho is not responsible for any psychological damage inflicted
-
     const c = document.getElementById("c");
-    let pos = new Vector2(event.clientX, event.clientY);
-    pos.divide(new Vector2(c.clientWidth, c.clientHeight));
+    var vec = new Vector3(); // create once and reuse
+    var pos = new Vector3() // create once and reuse
 
-    pos.set(
-      lerp(-this.bounds.x, this.bounds.x, pos.x),
-      lerp(-this.bounds.y, this.bounds.y, 1 - pos.y)
+    vec.set(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1,
+      0.5
     );
 
-    pos.x *= c.clientWidth / 400;
-    pos.y *= c.clientHeight / 200;
+    vec.unproject(this.camera);
 
-    this.aim.set(...pos.toArray(), -10);
+    vec.sub(this.camera.position).normalize();
+
+    var distance = (this.targetZ - this.camera.position.z) / vec.z;
+
+    pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
+    this.aim.set(...pos.toArray());
   }
 }

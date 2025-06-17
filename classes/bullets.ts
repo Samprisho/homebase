@@ -29,7 +29,7 @@ export class Bullet extends Object3D<Object3DEventMap> {
   ) {
     super();
 
-    this.position.set(position.x, position.y, position.z);
+    this.position.set(...position.toArray());
     this.lookAt(shootAt);
     this.speed = speed;
     this.damage = damage;
@@ -57,8 +57,42 @@ export class Bullet extends Object3D<Object3DEventMap> {
 }
 
 export class PlayerBullet extends Bullet {
-  isPlayerBullet: boolean = true;
+  constructor(
+    position: Vector3,
+    shootAt: Vector3,
+    speed: number,
+    damage: number
+  ) {
+    super(position, shootAt, speed, damage);
+    let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
+    let mat = new MeshPhongMaterial({ color: 0x00000 });
+    this.mesh = new Mesh(geo, mat);
 
+    this.mesh.geometry.computeBoundingBox();
+
+    this.mesh.rotateX(Math.PI / 2);
+    this.timeToLive = 2;
+
+    this.add(this.mesh);
+
+    let box: BulletHitbox = new BulletHitbox(this, this.mesh);
+    collisions.addHitbox(box);
+    box.collidedNotif = (other: Hitbox) => {
+      this.dispose();
+    };
+
+    instance.bullets.add(this);
+
+    this.dispose = () => {
+      geo.dispose();
+      mat.dispose();
+      box.dispose();
+      this.removeFromParent();
+    };
+  }
+}
+
+export class EnemyBullet extends Bullet {
   constructor(
     position: Vector3,
     shootAt: Vector3,
