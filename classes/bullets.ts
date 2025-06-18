@@ -65,7 +65,7 @@ export class PlayerBullet extends Bullet {
   ) {
     super(position, shootAt, speed, damage);
     let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
-    let mat = new MeshPhongMaterial({ color: 0x00000 });
+    let mat = new MeshPhongMaterial({ color: 0x0000ff });
     this.mesh = new Mesh(geo, mat);
 
     this.mesh.geometry.computeBoundingBox();
@@ -101,7 +101,7 @@ export class EnemyBullet extends Bullet {
   ) {
     super(position, shootAt, speed, damage);
     let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
-    let mat = new MeshPhongMaterial({ color: 0x00000 });
+    let mat = new MeshPhongMaterial({ color: 0xff000 });
     this.mesh = new Mesh(geo, mat);
 
     this.mesh.geometry.computeBoundingBox();

@@ -36,17 +36,20 @@ main {
 }
 
 main h1 {
+
   font-size: 49pt;
 
   border: 0.2rem solid white;
   border-radius: 0.5rem;
   padding: 1rem;
+
+  transform: perspective(4rem) rotatex(10deg)
 }
 
 main button {
   margin-top: 2rem;
   padding: 1rem;
-  width: 10em;
+  width: 8em;
 
   cursor: pointer;
 
@@ -71,10 +74,12 @@ main button:hover {
   0%  {
     color: white;
     background-color: rgba(0, 0, 0, 0);
+    width: 8em;
   }
   100% {
     color: black;
     background-color: white;
+    width: 9em;
   }
 }
 

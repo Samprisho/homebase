@@ -17,17 +17,16 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
   }
 
   function start() {
-
-    const main = qs("main")
-    main.classList.add("hidden")
+    const main = qs("main");
+    main.classList.add("hidden");
 
     const ui = id("ui");
 
     const clock = new THREE.Clock(true);
     const canvas = id("c");
 
-    ui.classList.remove("hidden")
-    canvas.classList.remove("hidden")
+    ui.classList.remove("hidden");
+    canvas.classList.remove("hidden");
 
     ui.addEventListener("click", (event) => {
       canvas.focus();
@@ -41,7 +40,7 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
     scene.add(ship);
     ship.camera = cam;
 
-    scene.background = new THREE.Color(0x00aaff);
+    scene.background = new THREE.Color(0x000000);
 
     /*   ship.position.set(0, -2, 2); */
 
@@ -77,6 +76,15 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
         const canvas = renderer.domElement;
         cam.aspect = canvas.clientWidth / canvas.clientHeight;
         cam.updateProjectionMatrix();
+
+        var vec = new THREE.Vector2(); // create once and reuse
+
+        vec.set(canvas.clientWidth, canvas.clientHeight);
+        vec.normalize();
+        console.log(vec);
+        vec.multiplyScalar(cam.aspect* -ship.position.z);
+
+        ship.bounds = new THREE.Vector2(...vec);
       }
 
       ship.update(delta);
