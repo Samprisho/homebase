@@ -9,6 +9,9 @@ import {
 import { instance } from "./instancing";
 import { BulletHitbox, collisions, Hitbox } from "./collisions";
 
+let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
+let mat = new MeshPhongMaterial({ color: 0x0000ff });
+
 export class Bullet extends Object3D<Object3DEventMap> {
   /**
    * In seconds
@@ -64,8 +67,7 @@ export class PlayerBullet extends Bullet {
     damage: number
   ) {
     super(position, shootAt, speed, damage);
-    let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
-    let mat = new MeshPhongMaterial({ color: 0x0000ff });
+
     this.mesh = new Mesh(geo, mat);
 
     this.mesh.geometry.computeBoundingBox();
@@ -84,8 +86,6 @@ export class PlayerBullet extends Bullet {
     instance.bullets.add(this);
 
     this.dispose = () => {
-      geo.dispose();
-      mat.dispose();
       box.dispose();
       this.removeFromParent();
     };

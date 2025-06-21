@@ -18,7 +18,7 @@ export class CollisionSystem {
   #entityHitboxes: Hitbox[] = [];
   #bulletHitboxes: Hitbox[] = [];
 
-  debugBoxes: boolean = true;
+  debugBoxes: boolean = false;
 
   constructor(scene: Scene) {
     gameScene = scene;

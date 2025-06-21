@@ -8,9 +8,13 @@ export class Instancing {
   scene: Scene = null;
 
   constructor(scene: Scene) {
-    this.scene = scene
+    this.scene = scene;
     this.scene.add(this.bullets);
     this.scene.add(this.enemies);
+
+    this.bullets.name = "bullets";
+    this.enemies.name = "enemies";
+
     instance = this;
   }
 }

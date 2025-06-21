@@ -5,6 +5,7 @@ import { BoxEnemy, Enemy } from "classes/enemies";
 import { Bullet } from "classes/bullets";
 import { Instancing, instance } from "classes/instancing";
 import { CollisionSystem, EntityHitbox } from "classes/collisions";
+import { EnemySchema, Phase, Stage } from "classes/stages";
 
 (function () {
   "use strict";
@@ -63,10 +64,38 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
       const cube = new BoxEnemy(new THREE.Vector3(-3 + index * 2, 2, -10));
     }
 
+    const stages = new Array<Stage>();
+
+    const enemySpawn: EnemySchema = {
+      name: "box",
+      amount: 10,
+      path: new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(-8, -5, -5),
+        new THREE.Vector3(0, 0, -10),
+        new THREE.Vector3(1, 0, -5)
+      ),
+      notifs: [
+        {
+          time: 0.2,
+          event: () => {
+            console.log("Notif!");
+          },
+        },
+      ],
+      time: 5,
+    };
+    const phase11 = new Phase(enemySpawn, "phase 1");
+
+    const phase12 = new Phase(enemySpawn, "phase 2");
+    const stage1 = new Stage([phase11, phase12]);
+    stages.push(stage1);
+
     renderer.render(scene, cam);
 
     canvas.tabIndex = 0;
     canvas.focus();
+
+    stages[0].start();
 
     function render(time) {
       time *= 0.001; // convert time to seconds
@@ -81,13 +110,13 @@ import { CollisionSystem, EntityHitbox } from "classes/collisions";
 
         vec.set(canvas.clientWidth, canvas.clientHeight);
         vec.normalize();
-        console.log(vec);
-        vec.multiplyScalar(cam.aspect* -ship.position.z);
+        vec.multiplyScalar(cam.aspect * -ship.position.z);
 
         ship.bounds = new THREE.Vector2(...vec);
       }
 
       ship.update(delta);
+      stages[0].update(delta);
 
       /*       const canvas = renderer.domElement;
       canvas.tabIndex = 0;
