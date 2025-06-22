@@ -67,7 +67,7 @@ import { EnemySchema, Phase, Stage } from "classes/stages";
     const stages = new Array<Stage>();
 
     const enemySpawn: EnemySchema = {
-      name: "box",
+      enemyType: "box",
       amount: 10,
       path: new THREE.QuadraticBezierCurve3(
         new THREE.Vector3(-8, -5, -5),

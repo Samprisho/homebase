@@ -3,8 +3,12 @@ import { BoxEnemy, Enemy } from "./enemies";
 
 /**
  * A stage simply plays out the given phases
- * @constructor
  * @param {Phase[]} phases Beware!, this get's reversed!
+ * @example
+ * ```typescript
+ * const phases: Array<Phase> = [phase1, phase2, phase3]
+ * const stage = new Stage(phases)
+ * ```
  */
 export class Stage {
   phases: Phase[] = new Array<Phase>();
@@ -18,15 +22,27 @@ export class Stage {
     console.log(this.phases);
   }
 
+  /**
+   * This initializes the first phase in the stage.
+   * @returns nothing
+   */
   start() {
     if (this.currPhase == null) return;
     this.currPhase.stage = this;
   }
 
+  /**
+   * Call every frame. Calls the current phases's `update()`
+   * @param delta change of time in seconds
+   */
   update(delta: number) {
     if (this.currPhase) this.currPhase.update(delta);
   }
 
+  /**
+   * Called by the current phase at the end of its run
+   * @param phase The phase announcing its end
+   */
   phaseFinished(phase: Phase) {
     this.phases.pop();
 
@@ -44,8 +60,28 @@ export class Stage {
  * A phase spawns enemies and provides them with what they need to move
  * along a path!
  *
- * @constructor
  * @param {EnemySchema} enemySchema this is the blueprint that determine's what play's out in a phase
+ * @example
+ * ```typescript
+ * const enemySchema: EnemySchema = {
+      enemyType: "box",
+      amount: 10,
+      path: new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(-8, -5, -5),
+        new THREE.Vector3(0, 0, -10),
+        new THREE.Vector3(1, 0, -5)
+      ),
+      notifs: [
+        {
+          time: 0.2,
+          event: () => console.log("Notif!"),
+        },
+      ],
+      time: 5,
+    };
+
+    const phase: Phase = new Phase(enemySchema, "Overworld 1")
+ * ```
  */
 export class Phase {
   stage: Stage;
@@ -69,9 +105,14 @@ export class Phase {
 
   start() {}
 
+  /**
+   * Called by owner stage every frame
+   * @param delta change of time in seconds
+   */
   update(delta: number) {
     this.time += delta;
 
+    // This block handles spawning enemies
     if (this.time >= this.spawnNextAt) {
       console.log("spawn!");
 
@@ -80,7 +121,7 @@ export class Phase {
 
       let enemy: Enemy;
 
-      switch (this.enemiesToSpawn.name) {
+      switch (this.enemiesToSpawn.enemyType) {
         case "box":
           enemy = new BoxEnemy();
           break;
@@ -96,6 +137,7 @@ export class Phase {
       this.enemies.push(enemy);
     }
 
+    // Notify owning stage we are finished spawning
     if (this.amountSpawned == this.enemiesToSpawn.amount) {
       console.log(`Phase ${this.name} finished`);
       this.stage.phaseFinished(this);
@@ -103,8 +145,31 @@ export class Phase {
   }
 }
 
+/**
+ * This is the schematics behind a phase
+ * @field {string} enemyType the type of enemy
+ * @see {@link QuadraticBezierCurve3}
+ * @example
+ * ```typescript
+ * const enemySchema: EnemySchema = {
+      enemyType: "box",
+      amount: 10,
+      path: new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(-8, -5, -5),
+        new THREE.Vector3(0, 0, -10),
+        new THREE.Vector3(1, 0, -5)
+      ),
+      notifs: [
+        {
+          time: 0.2,
+          event: () => console.log("Notif!"),
+        },
+      ],
+      time: 5,
+    };
+ */
 export type EnemySchema = {
-  name: string;
+  enemyType: string;
   amount: number;
   path: QuadraticBezierCurve3;
   notifs: CurveNotif[];
