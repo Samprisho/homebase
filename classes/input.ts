@@ -73,7 +73,6 @@ export class InputKey extends Input {
     this.held = true;
     this.justReleased = true;
 
-
     if (old != this.held) {
       this.justPressed = true;
 
@@ -115,7 +114,7 @@ export class MouseInput {
     document.addEventListener("mousemove", (event) => {
       if (this.onMove) this.onMove(event);
     });
-    document.addEventListener("click", (event) => {
+    document.addEventListener("mousedown", (event) => {
       if (this.onClick) this.onClick(event);
     });
   }

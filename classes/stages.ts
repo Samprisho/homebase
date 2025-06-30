@@ -10,6 +10,7 @@ import { BoxEnemy, Enemy } from "./enemies";
  * const stage = new Stage(phases)
  * ```
  */
+
 export class Stage {
   phases: Phase[] = new Array<Phase>();
   currPhase: Phase = null;
@@ -18,8 +19,6 @@ export class Stage {
     this.phases = phases;
     this.phases.reverse();
     this.currPhase = this.phases[phases.length - 1];
-
-    console.log(this.phases);
   }
 
   /**
@@ -27,8 +26,12 @@ export class Stage {
    * @returns nothing
    */
   start() {
-    if (this.currPhase == null) return;
-    this.currPhase.stage = this;
+    if (this.currPhase == null) {
+      console.log("No phase assighned");
+      return;
+    }
+    console.log("stage started");
+    this.currPhase.phaseFinished = this.phaseFinished.bind(this);
   }
 
   /**
@@ -43,17 +46,23 @@ export class Stage {
    * Called by the current phase at the end of its run
    * @param phase The phase announcing its end
    */
-  phaseFinished(phase: Phase) {
+  phaseFinished() {
     this.phases.pop();
+    console.log("stage notified about phase end");
 
     if (this.phases[this.phases.length - 1] == null) {
-      console.log("This stage is finished");
       this.currPhase = null;
+      if (this.stageFinished) this.stageFinished();
     } else {
       this.currPhase = this.phases[this.phases.length - 1];
-      this.currPhase.stage = this;
+      this.currPhase.phaseFinished = this.phaseFinished.bind(this);
     }
   }
+
+  /**
+   * This is modified by the Game class in a gamestate.ts
+   */
+  stageFinished: () => void;
 }
 
 /**
@@ -74,7 +83,6 @@ export class Stage {
       notifs: [
         {
           time: 0.2,
-          event: () => console.log("Notif!"),
         },
       ],
       time: 5,
@@ -84,8 +92,6 @@ export class Stage {
  * ```
  */
 export class Phase {
-  stage: Stage;
-
   enemiesToSpawn: EnemySchema;
   name: string;
 
@@ -114,8 +120,6 @@ export class Phase {
 
     // This block handles spawning enemies
     if (this.time >= this.spawnNextAt) {
-      console.log("spawn!");
-
       this.amountSpawned++;
       this.spawnNextAt += this.spawnEvery;
 
@@ -137,12 +141,15 @@ export class Phase {
       this.enemies.push(enemy);
     }
 
-    // Notify owning stage we are finished spawning
+    // Notify owning stage we have finished spawning
     if (this.amountSpawned == this.enemiesToSpawn.amount) {
-      console.log(`Phase ${this.name} finished`);
-      this.stage.phaseFinished(this);
+      if (this.phaseFinished) {
+        console.log("phase ended");
+        this.phaseFinished();
+      }
     }
   }
+  phaseFinished: () => void;
 }
 
 /**
@@ -168,17 +175,14 @@ export class Phase {
       time: 5,
     };
  */
-export type EnemySchema = {
+export interface EnemySchema {
   enemyType: string;
   amount: number;
   path: QuadraticBezierCurve3;
-  notifs: CurveNotif[];
+  notifs: number[];
   // Enemies get spawned over time, so enemies
   // will be spawned evenly over this timeframe, in seconds
   time: number;
-};
+}
 
-export type CurveNotif = {
-  time: number;
-  event: () => void;
-};
+

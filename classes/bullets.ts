@@ -100,8 +100,6 @@ export class EnemyBullet extends Bullet {
     damage: number
   ) {
     super(position, shootAt, speed, damage);
-    let geo = new CylinderGeometry(0.1, 0.1, 0.3, 6, 6, false);
-    let mat = new MeshPhongMaterial({ color: 0xff000 });
     this.mesh = new Mesh(geo, mat);
 
     this.mesh.geometry.computeBoundingBox();
@@ -120,8 +118,6 @@ export class EnemyBullet extends Bullet {
     instance.bullets.add(this);
 
     this.dispose = () => {
-      geo.dispose();
-      mat.dispose();
       box.dispose();
       this.removeFromParent();
     };

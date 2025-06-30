@@ -4,13 +4,19 @@ import { Ship } from "classes/ship";
 import { BoxEnemy, Enemy } from "classes/enemies";
 import { Bullet } from "classes/bullets";
 import { Instancing, instance } from "classes/instancing";
-import { CollisionSystem, EntityHitbox } from "classes/collisions";
+import { CollisionSystem } from "classes/collisions";
 import { EnemySchema, Phase, Stage } from "classes/stages";
+import { Game } from "classes/gamestate";
 
 (function () {
   "use strict";
 
+  const stageURLs = ["./stages/plains.json"];
+
   window.addEventListener("load", init);
+
+  const game = new Game();
+  game.load_stages(stageURLs);
 
   async function init() {
     const begin = qs("main button");
@@ -41,7 +47,7 @@ import { EnemySchema, Phase, Stage } from "classes/stages";
     scene.add(ship);
     ship.camera = cam;
 
-    scene.background = new THREE.Color(0x000000);
+    scene.background = new THREE.Color(0x212121);
 
     /*   ship.position.set(0, -2, 2); */
 
@@ -60,42 +66,12 @@ import { EnemySchema, Phase, Stage } from "classes/stages";
     const inst = new Instancing(scene);
     const collision = new CollisionSystem(scene);
 
-    for (let index = 0; index < 5; index++) {
-      const cube = new BoxEnemy(new THREE.Vector3(-3 + index * 2, 2, -10));
-    }
-
-    const stages = new Array<Stage>();
-
-    const enemySpawn: EnemySchema = {
-      enemyType: "box",
-      amount: 10,
-      path: new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(-8, -5, -5),
-        new THREE.Vector3(0, 0, -10),
-        new THREE.Vector3(1, 0, -5)
-      ),
-      notifs: [
-        {
-          time: 0.2,
-          event: () => {
-            console.log("Notif!");
-          },
-        },
-      ],
-      time: 5,
-    };
-    const phase11 = new Phase(enemySpawn, "phase 1");
-
-    const phase12 = new Phase(enemySpawn, "phase 2");
-    const stage1 = new Stage([phase11, phase12]);
-    stages.push(stage1);
-
     renderer.render(scene, cam);
 
     canvas.tabIndex = 0;
     canvas.focus();
 
-    stages[0].start();
+    game.start();
 
     function render(time) {
       time *= 0.001; // convert time to seconds
@@ -115,8 +91,8 @@ import { EnemySchema, Phase, Stage } from "classes/stages";
         ship.bounds = new THREE.Vector2(...vec);
       }
 
+      game.update(delta);
       ship.update(delta);
-      stages[0].update(delta);
 
       /*       const canvas = renderer.domElement;
       canvas.tabIndex = 0;
