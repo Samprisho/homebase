@@ -1,0 +1,26 @@
+{
+  "phases": [
+    {
+      "enemyType": "box",
+      "amount": 5,
+      "path": {
+        "start": [-8, 3, -2],
+        "control": [3,3,-10],
+        "end": [8, -3, -2]
+      },
+      "notfis": [],
+      "time": 3
+    },
+    {
+      "enemyType": "box",
+      "amount": 5,
+      "path": {
+        "start": [8, 3, -2],
+        "control": [-3,-3,-10],
+        "end": [-8, -3, -2]
+      },
+      "notfis": [],
+      "time": 2
+    }
+  ]
+}
