@@ -1,13 +1,13 @@
-import { EnemySchema, Phase, Stage } from "./stages";
+import { EnemySchema, Phase, SpawnGroup, Stage } from "./stages";
 import { QuadraticBezierCurve3, Vector3 } from "three";
 
-interface NotifData {
-  time: number;
-}
+// TODO Document this file
 
+/**
+ * This is the data strcuture of the JSON files in the stages directory
+ */
 interface PhaseData {
-  enemyType: string;
-  amount: number;
+  enemyTypes: { enemy: string; numberOfSpawns: number; timeConsume: number }[];
   path: {
     start: number[];
     control: number[];
@@ -16,11 +16,12 @@ interface PhaseData {
   notifs: number[];
   time: number;
 }
-
-interface StageData {
-  phases: PhaseData[];
-}
-
+/**
+ * Manages the game state.
+ * @function `load_stages(stagesDirectory)` call this during webapp initialization. Fetches and loads stages from the provided string path array
+ * @function `start()` starts the game, must have stages loaded before calling
+ * @function `update(delta)` called by the main loop. Calls `update()` on the curret stage, which calls `update()` on the current phase
+ */
 export class Game {
   urls: string[];
   stages: Stage[] = new Array<Stage>();
@@ -32,26 +33,31 @@ export class Game {
     for (const url of stagesDirectory) {
       let phases: Phase[] = new Array<Phase>();
       const response = await fetch(url);
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Failed to load ${url}: ${response.statusText}`);
-      }
 
-      const data = (await response.json()) as StageData;
-      data.phases.forEach((phase) => {
+      const text = await response.text();
+
+      const fdata = JSON.parse(text);
+
+      // Check each elemen
+
+      // Also check if something happens during the forEach
+      fdata.phases.forEach((phase: PhaseData, phaseIndex) => {
         let schema: EnemySchema = {
-          enemyType: phase.enemyType as string,
-          amount: phase.amount as number,
+          enemyTypes: phase.enemyTypes,
           path: new QuadraticBezierCurve3(
             new Vector3(...phase.path.start),
             new Vector3(...phase.path.control),
             new Vector3(...phase.path.end)
           ),
-          notifs: phase.notifs as number[],
-          time: phase.time as number,
+          notifs: phase.notifs,
+          totalTime: phase.time,
         };
+
         phases.push(new Phase(schema));
       });
+
       const stage = new Stage(phases);
       stage.stageFinished = this.onStageFinish.bind(this);
       this.stages.push(stage);
@@ -64,6 +70,9 @@ export class Game {
     console.log(this.stages);
   }
 
+  /**
+   * Passed to all stages, bound to this class. Called by stages when they have finished
+   */
   onStageFinish() {
     console.log("stage finished");
     this.stages.pop();
@@ -75,9 +84,9 @@ export class Game {
     } else {
       this.currStage = null;
       console.log("no more stages");
-      console.log(this.stages);
-      this.load_stages(this.urls);
 
+      // TODO: This code is temporary, delete when actually implementing
+      this.load_stages(this.urls);
       setTimeout(() => this.start(), 5000);
     }
   }

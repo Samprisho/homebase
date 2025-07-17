@@ -26,6 +26,7 @@ class Input {
    Yes, the following functions are implemeneted
    in the worst way possible. No, I will not
    fix it...yet
+   TODO: FIX THIS SHIT!!!! (The author is kindly asking to find a better solution)
   */
 
   public get wasJustPressed(): boolean {

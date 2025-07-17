@@ -25,6 +25,7 @@ export class CollisionSystem {
     collisions = this;
   }
 
+  // TODO: Refactor this code, it's very slow!
   update() {
     this.#allHitboxes.forEach((b, i, arr) => {
       if (b.owner == null) {
@@ -103,8 +104,7 @@ export class CollisionSystem {
 
 // Inherit intersect functions
 /**
- * Just a Box3 with added features, note that the boxes
- * must be updated by the owner object
+ * References the owning object's mesh and update's itself.
  *
  * @constructor
  * @param `owner`

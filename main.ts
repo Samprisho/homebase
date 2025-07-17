@@ -1,21 +1,22 @@
 import * as THREE from "three";
 import { Cam } from "classes/cam";
 import { Ship } from "classes/ship";
-import { BoxEnemy, Enemy } from "classes/enemies";
+import { Enemy } from "classes/enemies";
 import { Bullet } from "classes/bullets";
 import { Instancing, instance } from "classes/instancing";
 import { CollisionSystem } from "classes/collisions";
-import { EnemySchema, Phase, Stage } from "classes/stages";
 import { Game } from "classes/gamestate";
 
 (function () {
   "use strict";
 
-  const stageURLs = ["./stages/plains.json"];
+
 
   window.addEventListener("load", init);
 
   const game = new Game();
+
+  const stageURLs = ["stages/plains.json"];
   game.load_stages(stageURLs);
 
   async function init() {

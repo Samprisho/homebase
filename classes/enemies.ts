@@ -1,8 +1,6 @@
 import {
-  Box3,
   Box3Helper,
   BoxGeometry,
-  BoxHelper,
   Mesh,
   MeshPhongMaterial,
   Object3D,

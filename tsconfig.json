@@ -6,7 +6,8 @@
     "paths": {
       "three/*": ["node_modules/three/src/*"],
       "classes/*": ["./classes/*"],
-      "public/*": ["./public/*"]
+      "public/*": ["./public/*"],
+      "stages/*": ["./public/stages/*"]
     },
     "types": [
       "three",

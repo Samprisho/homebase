@@ -8,14 +8,13 @@ import { Cam } from "./cam";
 
 const loader = new GLTFLoader();
 
-// TODO: General refactoring of ship code:
 /*
  */
 export class Ship extends Object3D<Object3DEventMap> {
   shipMesh: Object3D<Object3DEventMap>;
   time: number = 0;
   camera: Cam;
-  targetZ: number = -7;
+  targetZ: number = -8;
 
   w = new InputKey("w");
   s = new InputKey("s");
@@ -61,6 +60,7 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.position.set(0, -1, -2.5);
 
     // Refactor this!
+    // Done :thumbs_up:
     loader.load("Ship.glb", async (gltf) => {
       this.shipMesh = gltf.scene.children[0];
       this.shipMesh.scale.multiplyScalar(0.8);
@@ -129,9 +129,7 @@ export class Ship extends Object3D<Object3DEventMap> {
             this.barrelRollDir *
               delta *
               this.barrelRollVelocityBonus *
-              (1 - this.barrelRollTime / this.barrelRollTimeTotal),
-            0,
-            0
+              (1 - this.barrelRollTime / this.barrelRollTimeTotal)
           )
         );
     }
@@ -145,23 +143,31 @@ export class Ship extends Object3D<Object3DEventMap> {
     this.velocity.y = clamp(this.velocity.y, -this.maxSpeed, this.maxSpeed);
 
     // Apply velocity
-    this.position.add(new Vector3(this.velocity.x, this.velocity.y, 0));
+    this.position.add(new Vector3(this.velocity.x, this.velocity.y));
 
-    //random jitter
+    // Make the ship jitter and shake ever so slightly
+    const jitterSpeed = 900;
+    const jitterFactor = 0.15;
     const jitter = new Vector3(
-      Math.sin(this.time * 900),
-      Math.sin(this.time * 900),
-      Math.sin(this.time * 900)
+      Math.sin(this.time * jitterSpeed),
+      Math.sin(this.time * jitterSpeed),
+      Math.sin(this.time * jitterSpeed)
     );
-    jitter.multiplyScalar(0.12);
+    jitter.multiplyScalar(jitterFactor);
 
     // Animate ship's orientation
+    const maxRotateXZ = 30;
+    const maxRotateY = 15;
     this.rotation.setFromVector3(
       new Vector3(
-        degToRad((this.velocity.y / this.maxSpeed) * 30 + jitter.x),
-        degToRad((this.velocity.x / this.maxSpeed) * -15 + 180 + jitter.y),
+        degToRad((this.velocity.y / this.maxSpeed) * maxRotateXZ + jitter.x),
         degToRad(
-          (this.velocity.x / this.maxSpeed) * 30 +
+          (this.velocity.x / this.maxSpeed) * -maxRotateY +
+            180 /*Ship model orientation came wrong, too lazy to fix d:*/ +
+            jitter.y
+        ),
+        degToRad(
+          (this.velocity.x / this.maxSpeed) * maxRotateXZ +
             this.barrelRollValue +
             jitter.z
         )
@@ -196,7 +202,6 @@ export class Ship extends Object3D<Object3DEventMap> {
   }
 
   // TODO: Refactor repettitve barrel roll code to use 1 function
-
   barrelRollLeft() {
     if (this.barrelRollOnCooldown == false) return;
     this.barrelRollOnCooldown = false;
@@ -228,14 +233,16 @@ export class Ship extends Object3D<Object3DEventMap> {
   }
 
   shoot(event) {
-    new PlayerBullet(this.position, this.aim, 40, 1);
+    const bulletSpeed = 80;
+    const damage = 1;
+    new PlayerBullet(this.position, this.aim, bulletSpeed, damage);
   }
 
   // Track mouse movement and ship's aim
   mouseMove(event: MouseEvent) {
     const c = document.getElementById("c");
     var vec = new Vector3(); // create once and reuse
-    var pos = new Vector3() // create once and reuse
+    var pos = new Vector3(); // create once and reuse
 
     vec.set(
       (event.clientX / window.innerWidth) * 2 - 1,
@@ -243,6 +250,8 @@ export class Ship extends Object3D<Object3DEventMap> {
       0.5
     );
 
+    // I still have no idea what this function does, but claude
+    // said it works, and I'm happy...for now.
     vec.unproject(this.camera);
 
     vec.sub(this.camera.position).normalize();

@@ -1,0 +1,29 @@
+{
+  "phases": [
+    {
+      "enemyTypes": [
+        { "enemy": "box", "numberOfSpawns": 5, "timeConsume": 1 }
+      ],
+      "path": {
+        "start": [-8, 3, -4],
+        "control": [0,0,-16],
+        "end": [8, -3, -4]
+      },
+      "notifs": [1, 4],
+      "time": 4
+    },
+    {
+      "enemyTypes": [
+        { "enemy": "box", "numberOfSpawns": 5, "timeConsume": 0.6 },
+        { "enemy": "box", "numberOfSpawns": 2, "timeConsume": 0.4 }
+      ],
+      "path": {
+        "start": [8, 3, -4],
+        "control": [0,0,-10],
+        "end": [-8, -3, -4]
+      },
+      "notifs": [6, 8],
+      "time": 1.5
+    }
+  ]
+}

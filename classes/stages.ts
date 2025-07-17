@@ -11,6 +11,7 @@ import { BoxEnemy, Enemy } from "./enemies";
  * ```
  */
 
+// TODO: IMPROVE PHASES BY USING NEW ENEMY SCHEMA, MAKE SURE TO FIX OTHER CLASSES
 export class Stage {
   phases: Phase[] = new Array<Phase>();
   currPhase: Phase = null;
@@ -92,19 +93,33 @@ export class Stage {
  * ```
  */
 export class Phase {
-  enemiesToSpawn: EnemySchema;
+  enemySchema: EnemySchema;
   name: string;
 
+  currSpawnGroup: SpawnGroup;
+  currEndTime: number = 999999;
   enemies: Enemy[] = new Array<Enemy>();
   time: number = 0;
   spawnEvery: number = 0;
   spawnNextAt: number = 0;
   amountSpawned: number = 0;
+  nextNotif: number = 999999;
 
   constructor(enemySchema: EnemySchema, name?: string) {
-    this.enemiesToSpawn = enemySchema;
-    this.spawnEvery = enemySchema.time / enemySchema.amount;
+    this.enemySchema = enemySchema;
+
+    this.enemySchema.enemyTypes.reverse();
+    this.currSpawnGroup = this.enemySchema.enemyTypes.pop();
+
+    this.currEndTime =
+      this.currSpawnGroup.timeConsume * this.enemySchema.totalTime;
+
+    this.spawnEvery = this.currEndTime / this.currSpawnGroup.numberOfSpawns;
     this.spawnNextAt = this.spawnEvery;
+
+    // TODO: Implement notifs
+    if (this.enemySchema.notifs.length != 0) {
+    }
 
     if (name) this.name = name;
   }
@@ -118,6 +133,8 @@ export class Phase {
   update(delta: number) {
     this.time += delta;
 
+    if (this.currSpawnGroup == null) return;
+
     // This block handles spawning enemies
     if (this.time >= this.spawnNextAt) {
       this.amountSpawned++;
@@ -125,7 +142,7 @@ export class Phase {
 
       let enemy: Enemy;
 
-      switch (this.enemiesToSpawn.enemyType) {
+      switch (this.currSpawnGroup.enemy) {
         case "box":
           enemy = new BoxEnemy();
           break;
@@ -134,55 +151,80 @@ export class Phase {
           break;
       }
 
-      enemy.path = this.enemiesToSpawn.path;
+      enemy.path = this.enemySchema.path;
       enemy.creationTime = this.time;
-      enemy.endTime = this.enemiesToSpawn.time;
+      enemy.endTime = this.enemySchema.totalTime;
 
       this.enemies.push(enemy);
     }
 
-    // Notify owning stage we have finished spawning
-    if (this.amountSpawned == this.enemiesToSpawn.amount) {
-      if (this.phaseFinished) {
-        console.log("phase ended");
+    if (this.amountSpawned == this.currSpawnGroup.numberOfSpawns) {
+      console.log("Spawn group finished", this.currSpawnGroup);
+      this.currSpawnGroup = this.enemySchema.enemyTypes.pop();
+
+      // End the phase here, we got no more things to spawn
+      if (this.currSpawnGroup == null) {
         this.phaseFinished();
+        return;
       }
+
+      // We proceed to the next spawn group
+      this.currEndTime =
+        this.currSpawnGroup.timeConsume * this.enemySchema.totalTime +
+        this.time;
+
+      this.amountSpawned = 0;
+
+      this.spawnEvery =
+        (this.currEndTime - this.time) / this.currSpawnGroup.numberOfSpawns;
+      this.spawnNextAt += this.spawnEvery;
     }
   }
   phaseFinished: () => void;
 }
 
-/**
- * This is the schematics behind a phase
- * @field {string} enemyType the type of enemy
- * @see {@link QuadraticBezierCurve3}
- * @example
- * ```typescript
- * const enemySchema: EnemySchema = {
-      enemyType: "box",
-      amount: 10,
-      path: new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(-8, -5, -5),
-        new THREE.Vector3(0, 0, -10),
-        new THREE.Vector3(1, 0, -5)
-      ),
-      notifs: [
-        {
-          time: 0.2,
-          event: () => console.log("Notif!"),
-        },
-      ],
-      time: 5,
-    };
- */
-export interface EnemySchema {
-  enemyType: string;
-  amount: number;
-  path: QuadraticBezierCurve3;
-  notifs: number[];
-  // Enemies get spawned over time, so enemies
-  // will be spawned evenly over this timeframe, in seconds
-  time: number;
+export interface SpawnGroup {
+  enemy: string;
+  numberOfSpawns: number;
+  /**
+   * This is in percent
+   * @example ```0.2, 0.8, 1```
+   */
+  timeConsume: number;
 }
 
+/**
+ * Schematics for spawning enemies
+ * 
+ * @example
+ * ```
+ * const schema: EnemySchema = {
+  enemyTypes: [
+    { enemy: "box", numberOfSpawns: 5, timeConsume: 0.4 },
+    { enemy: "box", numberOfSpawns: 15, timeConsume: 0.6 },
+  ],
+  path: new QuadraticBezierCurve3(),
+  notifs: [1, 7, 10],
+  totalTime: 10,
+};
+ * ```
+ */
+export interface EnemySchema {
+  enemyTypes: SpawnGroup[];
+  path: QuadraticBezierCurve3;
+  notifs: number[];
+  /** Enemies get spawned over time, so enemies in the current spawn group
+   * will be spawned evenly over this timeframe, in seconds
+   */
+  totalTime: number;
+}
 
+const sch: EnemySchema = {
+  enemyTypes: [
+    { enemy: "box", numberOfSpawns: 5, timeConsume: 0.4 },
+    { enemy: "box", numberOfSpawns: 15, timeConsume: 0.6 },
+  ],
+  path: new QuadraticBezierCurve3(),
+  notifs: [1, 7, 10],
+  totalTime: 10,
+};
