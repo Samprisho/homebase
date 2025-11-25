@@ -26,6 +26,7 @@ export class CollisionSystem {
   }
 
   // TODO: Refactor this code, it's very slow!
+
   update() {
     this.#allHitboxes.forEach((b, i, arr) => {
       if (b.owner == null) {
